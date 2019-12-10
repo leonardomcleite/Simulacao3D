@@ -16,12 +16,22 @@ class GameViewController: UIViewController {
     let CategoryGoal = 4
     let CategoryGoalKeeper = 8
     
+    var goals:Int = 0
+    var defenses:Int = 0
+    var lost:Int = 0
+    var entrou:Bool = false
+    
     var sceneView:SCNView!
     var scene:SCNScene!
     
     var ballNode:SCNNode!
+    var crossbarNode:SCNNode!
     var goalkeeperNode:SCNNode!
     var selfieStickNode:SCNNode!
+    
+    var goalsNode:SCNNode!
+    var lostNode:SCNNode!
+    var defenseNode:SCNNode!
     
     var motion = MotionHelper()
     var motionForce = SCNVector3(0, 0, 0)
@@ -55,10 +65,15 @@ class GameViewController: UIViewController {
     
     func setupNodes() {
         ballNode = scene.rootNode.childNode(withName: "ball", recursively: true)!
-        ballNode.physicsBody?.contactTestBitMask = CategoryCrossbar
+        ballNode.physicsBody?.contactTestBitMask = 46
         goalkeeperNode = scene.rootNode.childNode(withName: "goalkeeper", recursively: true)!
         goalkeeperNode.physicsBody?.contactTestBitMask = CategoryBall
         selfieStickNode = scene.rootNode.childNode(withName: "selfieStick", recursively: true)!
+        crossbarNode = scene.rootNode.childNode(withName: "crossbar", recursively: true)!
+        crossbarNode.physicsBody?.contactTestBitMask = CategoryBall
+        goalsNode = scene.rootNode.childNode(withName: "goals", recursively: true)!
+        lostNode = scene.rootNode.childNode(withName: "lost", recursively: true)!
+        defenseNode = scene.rootNode.childNode(withName: "defense", recursively: true)!
     }
     
     func setupSounds() {
@@ -93,40 +108,136 @@ class GameViewController: UIViewController {
                 if node.name == "ball" {
                     let jumpSound = sounds["jump"]!
                     ballNode.runAction(SCNAction.playAudio(jumpSound, waitForCompletion: false))
-                    let sideVector:[Float]! = [-1.4, -0.8, -0.6, -0.4, -0.2, 0, 0.2, 0.4, 0.6, 0.8, 1.5]
-                    let heightVector:[Float]! = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0]
+                    let sideVector:[Float]! = [-2, -1.4, -0.8, -0.6, -0.2, 0, 0.2, 0.6, 0.8, 1.5, 2]
+                    let heightVector:[Float]! = [0.0, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1.0, 2.0, 3.0]
                     let distanceVector:[Float]! = [-5.5, -5.4, -5.3, -5.2, -5.1, -5.0, -4.9, -4.8, -4.7, -4.6, -4.5]
                     
-//                    var p1:[[Float]] = []
-//                    p1[0] = [0, 0.05]
-//                    p1[1] = [0.05, 0.1]
-//                    p1[2] = [0.1, 0.15]
-//                    p1[3] = [0.15, 0.16]
-//                    p1[4] = [0.16, 0.22]
-//                    p1[5] = [0.22, 0.28]
-//                    p1[6] = [0.28, 0.33]
-//                    p1[7] = [0.33, 0.37]
-//                    p1[8] = [0.37, 0.43]
-//                    p1[9] = [0.43, 0.5]
-//                    p1[10] = [0.5, 0.61]
-//                    p1[11] = [0.61, 0.69]
-//                    p1[12] = [0.69, 0.72]
-//                    p1[13] = [0.72, 0.85]
-//                    p1[14] = [0.85, 1]
+                    var side = sideVector[Int.random(in: 0...10)]
+                    var height = heightVector[Int.random(in: 0...10)]
+                    var distance = distanceVector[Int.random(in: 0...10)]
                     
+                    let dadoSide = Int.random(in: 0...100);
+                    if dadoSide >= 0 && dadoSide <= 5 {
+                        side = sideVector[0]
+                    } else if dadoSide <= 22 {
+                        side = sideVector[1]
+                    } else if dadoSide <= 25 {
+                        side = sideVector[2]
+                    } else if dadoSide <= 30 {
+                        side = sideVector[3]
+                    } else if dadoSide <= 31 {
+                        side = sideVector[4]
+                    } else if dadoSide <= 32 {
+                        side = sideVector[5]
+                    } else if dadoSide <= 33 {
+                        side = sideVector[6]
+                    } else if dadoSide <= 80 {
+                        side = sideVector[7]
+                    } else if dadoSide <= 95 {
+                        side = sideVector[8]
+                    } else {
+                        side = sideVector[9]
+                    }
                     
-                    let side = sideVector[Int.random(in: 0...10)]
-                    let height = heightVector[Int.random(in: 0...10)]
-                    let distance = distanceVector[Int.random(in: 0...10)]
+                    let dadoHeight = Int.random(in: 0...100);
+                    if dadoHeight >= 0 && dadoHeight <= 10 {
+                        height = heightVector[0]
+                    } else if dadoHeight > 10  && dadoHeight <= 20 {
+                        height = heightVector[1]
+                    } else if dadoHeight > 20 && dadoHeight <= 30 {
+                        height = heightVector[2]
+                    } else if dadoHeight > 0 && dadoHeight <= 40 {
+                        height = heightVector[3]
+                    } else if dadoHeight > 0 && dadoHeight <= 50 {
+                        height = heightVector[4]
+                    } else if dadoHeight > 0 && dadoHeight <= 60 {
+                        height = heightVector[5]
+                    } else if dadoHeight > 0 && dadoHeight <= 70 {
+                        height = heightVector[6]
+                    } else if dadoHeight > 0 && dadoHeight <= 80 {
+                        height = heightVector[7]
+                    } else if dadoHeight > 0 && dadoHeight <= 90 {
+                        height = heightVector[8]
+                    } else {
+                        height = heightVector[9]
+                    }
+                    
+                    let dadoDistance = Int.random(in: 0...100);
+                    if dadoDistance >= 0 && dadoDistance <= 10 {
+                        distance = distanceVector[0]
+                    } else if dadoDistance > 10  && dadoDistance <= 20 {
+                        distance = distanceVector[1]
+                    } else if dadoDistance > 20 && dadoDistance <= 30 {
+                        distance = distanceVector[2]
+                    } else if dadoDistance > 0 && dadoDistance <= 40 {
+                        distance = distanceVector[3]
+                    } else if dadoDistance > 0 && dadoDistance <= 50 {
+                        distance = distanceVector[4]
+                    } else if dadoDistance > 0 && dadoDistance <= 60 {
+                        distance = distanceVector[5]
+                    } else if dadoDistance > 0 && dadoDistance <= 70 {
+                        distance = distanceVector[6]
+                    } else if dadoDistance > 0 && dadoDistance <= 80 {
+                        distance = distanceVector[7]
+                    } else if dadoDistance > 0 && dadoDistance <= 90 {
+                        distance = distanceVector[8]
+                    } else {
+                        distance = distanceVector[9]
+                    }
+                    
                     ballNode.physicsBody?.applyForce(SCNVector3(x: side, y: height, z: distance), asImpulse: true)
                     
                     let waitDefend = SCNAction.wait(duration: 0.01)
                     let defending = SCNAction.run { (node) in
+                        
                         let sideVectorGoalKeeper:[Float]! = [-1.0, -0.8, -0.6, -0.4, -0.2, 0, 0.2, 0.4, 0.6, 0.8, 1]
                         let jumpVectorGoalKeeper:[Float]! = [0, 0.2, 0.4, 0.6, 0.8, 1]
-                        let sideGoalKeeper = sideVectorGoalKeeper[Int.random(in: 0...10)] * 250.0
-                        let jumpVector = jumpVectorGoalKeeper[Int.random(in: 0...5)] * 250.0
-                        node.physicsBody?.applyForce(SCNVector3(x: sideGoalKeeper, y: jumpVector, z: 0), asImpulse: true)
+                        
+                        var sideGoalKeeper = sideVectorGoalKeeper[Int.random(in: 0...10)] * 250.0
+                        var jump = jumpVectorGoalKeeper[Int.random(in: 0...5)] * 200.0
+                        
+                        let dadoSide = Int.random(in: 0...100);
+                        if dadoSide >= 0 && dadoSide <= 21 {
+                            sideGoalKeeper = sideVectorGoalKeeper[0]
+                        } else if dadoSide <= 42 {
+                            sideGoalKeeper = sideVectorGoalKeeper[1]
+                        } else if dadoSide <= 43 {
+                            sideGoalKeeper = sideVectorGoalKeeper[2]
+                        } else if dadoSide <= 44 {
+                            sideGoalKeeper = sideVectorGoalKeeper[3]
+                        } else if dadoSide <= 45 {
+                            sideGoalKeeper = sideVectorGoalKeeper[4]
+                        } else if dadoSide <= 46 {
+                            sideGoalKeeper = sideVectorGoalKeeper[5]
+                        } else if dadoSide <= 47 {
+                            sideGoalKeeper = sideVectorGoalKeeper[6]
+                        } else if dadoSide <= 48 {
+                            sideGoalKeeper = sideVectorGoalKeeper[7]
+                        } else if dadoSide <= 70 {
+                            sideGoalKeeper = sideVectorGoalKeeper[8]
+                        } else {
+                            sideGoalKeeper = sideVectorGoalKeeper[9]
+                        }
+                        
+                        let dadoJump = Int.random(in: 0...100);
+                        if dadoJump >= 0 && dadoJump <= 16 {
+                            jump = jumpVectorGoalKeeper[0]
+                        } else if dadoJump >  16  && dadoJump <= 33 {
+                            jump = jumpVectorGoalKeeper[1]
+                        } else if dadoJump >  33 && dadoJump <= 50 {
+                            jump = jumpVectorGoalKeeper[2]
+                        } else if dadoJump > 50 && dadoJump <= 67 {
+                            jump = jumpVectorGoalKeeper[3]
+                        } else if dadoJump > 67 && dadoJump <= 83 {
+                            jump = jumpVectorGoalKeeper[4]
+                        } else {
+                            jump = jumpVectorGoalKeeper[5]
+                        }
+                        
+                        sideGoalKeeper = sideGoalKeeper * 100.0
+                        jump = jump * 100.0
+                        
+                        node.physicsBody?.applyForce(SCNVector3(x: sideGoalKeeper, y: jump, z: 0), asImpulse: true)
                     }
                     let defend = SCNAction.sequence([waitDefend, defending])
                     goalkeeperNode.runAction(defend)
@@ -135,6 +246,7 @@ class GameViewController: UIViewController {
                     let reset = SCNAction.run { (node) in
                         node.physicsBody?.clearAllForces()
                         node.position = SCNVector3(x: 0, y: 0, z: 0)
+                        self.entrou = false
                     }
                     let actionSequence = SCNAction.sequence([waitAction, reset])
                     ballNode.runAction(actionSequence)
@@ -192,26 +304,50 @@ class GameViewController: UIViewController {
 extension GameViewController : SCNPhysicsContactDelegate {
     func physicsWorld(_ world: SCNPhysicsWorld, didBegin contact: SCNPhysicsContact) {
         var contactNode:SCNNode!
-        
+        if entrou {
+            return
+        }
+        lost += 1
+        entrou = true
         if contact.nodeA.name == "ball" {
             contactNode = contact.nodeB
         } else {
             contactNode = contact.nodeA
         }
         
-        if contactNode.physicsBody?.categoryBitMask == CategoryCrossbar || contactNode.physicsBody?.categoryBitMask == CategoryGoal || contactNode.physicsBody?.categoryBitMask == CategoryGoalKeeper {
-//            contactNode.isHidden = true
+        if contactNode.physicsBody?.categoryBitMask == CategoryCrossbar ||
+            contactNode.physicsBody?.categoryBitMask == CategoryGoal ||
+            contactNode.physicsBody?.categoryBitMask == CategoryGoalKeeper {
+            
+            let cat = (contactNode.physicsBody?.categoryBitMask)
+            
+            switch cat {
+            case CategoryGoal:
+                lost -= 1
+                goals += 1
+            case CategoryCrossbar:
+                lost -= 1
+                goals += 1
+            case CategoryGoalKeeper:
+                lost -= 1
+                defenses += 1
+            default:
+                print("Saiu")
+            }
             
             let sawSound = sounds["saw"]!
             ballNode.runAction(SCNAction.playAudio(sawSound, waitForCompletion: false))
-            
-//            let waitAction = SCNAction.wait(duration: 5)
-//            let unhideAction = SCNAction.run { (node) in
-//                node.isHidden = false
-//            }
-//            let actionSequence = SCNAction.sequence([waitAction, unhideAction])
-//            contactNode.runAction(actionSequence)
         }
+        
+    
+        let goalsNodeText = goalsNode.geometry as! SCNText
+        goalsNodeText.string = String(goals)
+        
+        let defensesText = defenseNode.geometry as! SCNText
+        defensesText.string = String(defenses)
+        
+        let lostText = lostNode.geometry as! SCNText
+        lostText.string = String(lost)
         
     }
     
